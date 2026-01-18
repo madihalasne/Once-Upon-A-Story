@@ -4,7 +4,7 @@ import { GoogleGenAI, Type, GenerateContentResponse, Modality } from "@google/ge
 const API_KEY = process.env.API_KEY;
 
 export const generateStoryContent = async (prompt: string): Promise<{ story: string, quote: string, poetry: string, lore: string, characterLore: string }> => {
-  const ai = new GoogleGenAI({ apiKey: API_KEY });
+  const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
   const response = await ai.models.generateContent({
     model: 'gemini-3-flash-preview',
     contents: prompt,
