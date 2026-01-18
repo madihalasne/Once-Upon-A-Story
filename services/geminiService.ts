@@ -1,7 +1,7 @@
 
 import { GoogleGenAI, Type, GenerateContentResponse, Modality } from "@google/genai";
 
-const API_KEY = process.env.API_KEY;
+const VITE_GEMINI_API_KEY = process.env.API_KEY;
 
 export const generateStoryContent = async (prompt: string): Promise<{ story: string, quote: string, poetry: string, lore: string, characterLore: string }> => {
   const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
