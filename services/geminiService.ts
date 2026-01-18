@@ -19,13 +19,10 @@ const STORY_IMAGES = {
   }
 };
 
-export const getStoryImage = (
-  storyNumber: 1 | 2 | 3,
-  version: "before" | "after"
-): string => {
-  return STORY_IMAGES[`story${storyNumber}`][version];
+export const getStoryImage = (storyIndex: number, stage: "before" | "after"): string => {
+  // storyIndex: 1, 2, 3
+  return `/images/story${storyIndex}-${stage}.png`;
 };
-
 
 // Fallback content if story generation fails
 const FALLBACK_CONTENT = {
@@ -87,65 +84,11 @@ export const generateStoryContent = async (
   }
 };
 
-// ================== IMAGE PROMPT BUILDER ==================
-const createImagePromptFromStory = (storyText: string) => {
-  return `
-Create a children's storybook illustration.
-
-Scene requirements (VERY IMPORTANT):
-- Show a visible character (child, animal, fairy, or ghost)
-- Show a clear action (walking, holding, looking, sitting, floating)
-- Show a physical place (forest, bedroom, village, garden, night sky)
-
-Story context:
-${storyText}
-
-Style:
-Hand-painted watercolor
-storybook illustration
-soft pastel colors
-gentle lighting
-Beatrix Potter inspired
-whimsical
-cozy
-magical
-NO realism
-NO photographs
-NO modern objects
-`;
-};
-
-// ================== IMAGE ==================
-
-
 // ================== EDIT IMAGE ==================
 export const editImageWithPrompt = async (base64Image: string, editPrompt: string): Promise<string> => {
-  const ai = new GoogleGenAI({ apiKey: API_KEY });
-  const cleanBase64 = base64Image.replace(/^data:image\/(png|jpeg);base64,/, "");
-
-  try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash-image',
-      contents: [
-        { inlineData: { data: cleanBase64, mimeType: 'image/png' } },
-        { text: `Gently update this watercolor illustration: ${editPrompt}. Keep classic storybook style, soft light, magical, charming.` }
-      ],
-      config: { imageConfig: { aspectRatio: "1:1", width: 512, height: 512 } }
-    });
-
-    const parts = response.candidates?.[0]?.content?.parts || [];
-    for (const part of parts) {
-      if (part.inlineData?.data) return `data:image/png;base64,${part.inlineData.data}`;
-      if (part.uri) return part.uri;
-    }
-
-    console.warn("Edit image returned no data, using original");
-    return base64Image;
-
-  } catch (e) {
-    console.warn("Edit image failed, returning original:", e);
-    return base64Image;
-  }
+  return base64Image; // simply return original
+};export const editImageWithPrompt = async (base64Image: string, editPrompt: string): Promise<string> => {
+  return base64Image; // simply return original
 };
 
 // ================== SPEECH ==================
