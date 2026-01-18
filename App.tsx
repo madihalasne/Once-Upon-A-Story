@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Story, JournalState } from './types';
-import { generateStoryContent, getStoryImage, editImageWithPrompt, generateVeoVideo, generateSpeech } from './services/geminiService';
+import { generateStoryContent, getStoryImage, generateVeoVideo, generateSpeech } from './services/geminiService';
 import { StoryPaper, LoreSeal, ParchmentScrap } from './components/JournalUI';
 
 const INITIAL_STORIES: Story[] = [
@@ -103,15 +103,8 @@ try {
   };
 }
 
-const imagePrompt = `Classic watercolor update: ${actionInput}. Add soft golden light, blooming flowers, and a sense of magical healing.`;
-let newImage;
-try {
- const newImage = getStoryImage(state.currentPageIndex, "after");
-} catch (e) {
-  console.warn("Edit image failed, using original:", e);
-  newImage = currentStory.currentImage!;
-}
-
+// Directly use manual "after" image
+const newImage = getStoryImage(state.currentPageIndex, "after");
 
       const updatedStories = [...state.stories];
       updatedStories[state.currentPageIndex - 1] = {
