@@ -88,6 +88,17 @@ export const generateStoryContent = async (
 export const editImageWithPrompt = async (base64Image: string, editPrompt: string): Promise<string> => {
   return base64Image; // simply return original
 };
+
+const VOICE_PROFILES: Record<
+  string,
+  { rate: number; pitch: number; volume: number }
+> = {
+  Pip: { rate: 0.95, pitch: 1.6, volume: 0.9 },          // small bird
+  Luna: { rate: 0.9, pitch: 1.4, volume: 0.85 },         // dreamy girl
+  "Master Thomas": { rate: 0.85, pitch: 0.8, volume: 0.9 }, // older man
+  default: { rate: 1, pitch: 1, volume: 1 }
+};
+
 // ================== SPEECH ==================
 export function generateSpeech(
   text: string,
@@ -101,7 +112,13 @@ export function generateSpeech(
     const voices = synth.getVoices();
     if (!voices.length) return;
 
-    const utter = new SpeechSynthesisUtterance(text);
+   const emotionalText = text
+  .replace(/,/g, ", ... ")
+  .replace(/\./g, ". ... ")
+  .replace(/\?/g, "? ... ")
+  .replace(/!/g, "! ...");
+
+const utter = new SpeechSynthesisUtterance(emotionalText);
 
     // Pick a stable English voice
     const voice =
