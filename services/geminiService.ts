@@ -65,31 +65,29 @@ export const generateStoryContent = async (
 
 // ================== IMAGE PROMPT BUILDER ==================
 const createImagePromptFromStory = (storyText: string) => {
-  // Take only the first 1–2 sentences to avoid abstract confusion
-  const visualScene = storyText
-    .replace(/\n/g, " ")
-    .split(".")
-    .slice(0, 2)
-    .join(".")
-    .trim();
-
   return `
-Children's storybook watercolor illustration.
+Create a children's storybook illustration.
 
-Visible scene:
-${visualScene}
+Scene requirements (VERY IMPORTANT):
+- Show a visible character (child, animal, fairy, or ghost)
+- Show a clear action (walking, holding, looking, sitting, floating)
+- Show a physical place (forest, bedroom, village, garden, night sky)
 
-Environment details:
-Soft magical lighting, gentle glow, pastel colors, whimsical fantasy mood.
-Natural scenery like forests, gardens, cottages, or moonlit paths.
+Story context:
+${storyText}
 
-Art style:
-Beatrix Potter inspired watercolor,
-soft ink outlines,
-hand-painted texture,
-warm cream paper background,
-storybook illustration,
-gentle, cozy, magical.
+Style:
+Hand-painted watercolor
+storybook illustration
+soft pastel colors
+gentle lighting
+Beatrix Potter inspired
+whimsical
+cozy
+magical
+NO realism
+NO photographs
+NO modern objects
 `;
 };
 
@@ -98,35 +96,30 @@ export const generateStoryImage = async (storyText: string): Promise<string> => 
   const ai = new GoogleGenAI({ apiKey: API_KEY });
 
   try {
-    // ✅ NEW: create clean visual prompt
     const imagePrompt = createImagePromptFromStory(storyText);
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash-image',
-      contents: [{ text: imagePrompt }],
+      model: "gemini-2.5-flash-image",
+      contents: [{ role: "user", parts: [{ text: imagePrompt }] }],
       config: {
-        imageConfig: {
-          aspectRatio: "1:1",
-          width: 512,
-          height: 512
-        }
+        responseModalities: ["IMAGE"],
+        imageConfig: { width: 512, height: 512, aspectRatio: "1:1" }
       }
     });
 
     const parts = response.candidates?.[0]?.content?.parts || [];
+
     for (const part of parts) {
       if (part.inlineData?.data) {
         return `data:image/png;base64,${part.inlineData.data}`;
       }
-      if (part.uri) return part.uri;
     }
 
-    console.warn("No image returned, using placeholder");
-    return 'https://picsum.photos/id/20/400/400';
+    throw new Error("No image generated");
 
   } catch (e) {
-    console.warn("Image generation failed, using placeholder:", e);
-    return 'https://picsum.photos/id/20/400/400';
+    console.warn("Image generation failed:", e);
+    return "https://picsum.photos/400/400";
   }
 };
 
