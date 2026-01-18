@@ -102,18 +102,30 @@ export const generateSpeech = async (text: string, voiceName = "Kore"): Promise<
     });
 
     const base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
-    if (base64Audio) {
-      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
-      const audioBuffer = await decodeAudioData(decodeBase64(base64Audio), ctx, 24000, 1);
-      const source = ctx.createBufferSource();
-      source.buffer = audioBuffer;
-      source.connect(ctx.destination);
-      source.start();
+    if (!base64Audio) {
+      console.warn("No audio data returned for speech.");
+      return;
     }
+
+    const audioBlob = base64ToBlob(base64Audio, 'audio/wav');
+    const audioUrl = URL.createObjectURL(audioBlob);
+    const audio = new Audio(audioUrl);
+    audio.volume = 0.3; // or state.audioVolume if you want
+    audio.play();
+
   } catch (e) {
     console.warn("TTS generation failed:", e);
   }
 };
+
+// Helper to convert base64 to Blob
+function base64ToBlob(base64: string, mime: string) {
+  const byteChars = atob(base64);
+  const byteNumbers = new Array(byteChars.length);
+  for (let i = 0; i < byteChars.length; i++) byteNumbers[i] = byteChars.charCodeAt(i);
+  const byteArray = new Uint8Array(byteNumbers);
+  return new Blob([byteArray], { type: mime });
+}
 
 // ================== HELPERS ==================
 function decodeBase64(base64: string) {
