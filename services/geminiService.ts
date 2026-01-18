@@ -89,48 +89,34 @@ export const editImageWithPrompt = async (base64Image: string, editPrompt: strin
   return base64Image; // simply return original
 };
 // ================== SPEECH ==================
-export const generateSpeech = async (text: string, voiceName = "Kore"): Promise<void> => {
-  try {
-    const ai = new GoogleGenAI({ apiKey: API_KEY });
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash-preview-tts",
-      contents: [{ parts: [{ text }] }],
-      config: {
-        responseModalities: [Modality.AUDIO],
-        speechConfig: {
-          voiceConfig: { prebuiltVoiceConfig: { voiceName } },
-        },
-      },
-    });
-
-    // Get the audio data
-    const base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
-    if (!base64Audio) return;
-
-    // Convert to blob and play
-    const byteCharacters = atob(base64Audio);
-    const byteNumbers = new Array(byteCharacters.length);
-    for (let i = 0; i < byteCharacters.length; i++) {
-      byteNumbers[i] = byteCharacters.charCodeAt(i);
-    }
-    const byteArray = new Uint8Array(byteNumbers);
-    const blob = new Blob([byteArray], { type: "audio/mpeg" }); // TTS usually returns mp3
-    const url = URL.createObjectURL(blob);
-
-    const audio = new Audio(url);
-audio.volume = 0.3;
-
-try {
-  await audio.play();
-} catch (err) {
-  console.warn("Audio playback blocked:", err);
-}
-
-
-  } catch (e) {
-    console.warn("TTS generation failed:", e);
+export const generateSpeech = async (
+  text: string,
+  voiceName = "Kore"
+): Promise<void> => {
+  if (!("speechSynthesis" in window)) {
+    console.warn("Speech synthesis not supported");
+    return;
   }
+
+  const utterance = new SpeechSynthesisUtterance(text);
+
+  // Voice mapping
+  const voices = window.speechSynthesis.getVoices();
+  const preferred =
+    voices.find(v => v.name.toLowerCase().includes("female")) ||
+    voices.find(v => v.lang.startsWith("en")) ||
+    voices[0];
+
+  if (preferred) utterance.voice = preferred;
+
+  utterance.rate = 0.95;
+  utterance.pitch = 1.05;
+  utterance.volume = 0.9;
+
+  window.speechSynthesis.cancel(); // stop overlapping
+  window.speechSynthesis.speak(utterance);
 };
+
 
 // ================== HELPERS ==================
 function decodeBase64(base64: string) {
