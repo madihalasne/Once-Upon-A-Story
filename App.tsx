@@ -68,13 +68,15 @@ const App: React.FC = () => {
       setLoadingMessage("Winding the clocks of Once Upon A Time...");
       const updatedStories = [...state.stories];
       for (let i = 0; i < updatedStories.length; i++) {
-        if (!updatedStories[i].currentImage) {
-          try {
-            updatedStories[i].currentImage = await generateStoryImage(updatedStories[i].initialSadStory);
-          } catch (e) {
-            updatedStories[i].currentImage = 'https://picsum.photos/id/20/400/400';
-          }
-        }
+       if (!updatedStories[i].currentImage) {
+  try {
+    updatedStories[i].currentImage = await generateStoryImage(updatedStories[i].initialSadStory);
+  } catch (e) {
+    console.warn("Image generation failed, using placeholder:", e);
+    updatedStories[i].currentImage = 'https://via.placeholder.com/400x400.png?text=Story+Image';
+  }
+}
+
       }
       setState(prev => ({ ...prev, stories: updatedStories }));
       setIsLoading(false);
@@ -92,10 +94,29 @@ const App: React.FC = () => {
 
     try {
       const prompt = `Rewrite this story: "${currentStory.initialSadStory}". The reader helps by: "${actionInput}". Provide a heartwarming happy ending, a new joyful character quote, a 4-line happy poem, a new secret world lore hint, and an intimate character past secret about this happy turn.`;
-      const result = await generateStoryContent(prompt);
+    let result;
+try {
+  result = await generateStoryContent(prompt);
+} catch (err) {
+  console.warn("Story rewrite failed, using fallback:", err);
+  result = {
+    story: "A joyful ending unfolds...",
+    quote: "Happiness finds its way.",
+    poetry: "Sunlight warms the sleepy town,\nJoy returns without a frown.\nLaughter rings where shadows lay,\nHearts are bright, come what may.",
+    lore: "A new secret blooms under the old oak.",
+    characterLore: "The hero remembers the kindness that changed the world."
+  };
+}
 
-      const imagePrompt = `Classic watercolor update: ${actionInput}. Add soft golden light, blooming flowers, and a sense of magical healing.`;
-      const newImage = await editImageWithPrompt(currentStory.currentImage!, imagePrompt);
+const imagePrompt = `Classic watercolor update: ${actionInput}. Add soft golden light, blooming flowers, and a sense of magical healing.`;
+let newImage;
+try {
+  newImage = await editImageWithPrompt(currentStory.currentImage!, imagePrompt);
+} catch (e) {
+  console.warn("Edit image failed, using original:", e);
+  newImage = currentStory.currentImage!;
+}
+
 
       const updatedStories = [...state.stories];
       updatedStories[state.currentPageIndex - 1] = {
@@ -111,12 +132,9 @@ const App: React.FC = () => {
 
       setState(prev => ({ ...prev, stories: updatedStories }));
       setActionInput('');
-    } catch (error) {
-      console.error(error);
-      alert("The story is resisting change. Try a softer touch.");
-    } finally {
-      setIsLoading(false);
-    }
+   } finally {
+  setIsLoading(false);
+}
   };
 
   const handleAnimate = async () => {
