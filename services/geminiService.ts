@@ -5,26 +5,34 @@ const API_KEY = process.env.API_KEY;
 
 export const generateStoryContent = async (prompt: string): Promise<{ story: string, quote: string, poetry: string, lore: string, characterLore: string }> => {
   const ai = new GoogleGenAI({ apiKey: API_KEY });
-  const response = await ai.models.generateContent({
-    model: 'gemini-3-flash-preview',
-    contents: prompt,
-    config: {
-      temperature: 0.85,
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: Type.OBJECT,
-        properties: {
-          story: { type: Type.STRING },
-          quote: { type: Type.STRING, description: "A short, 1-sentence emotional quote from the character." },
-          poetry: { type: Type.STRING, description: "A 4-line rhyming poem reflecting the mood." },
-          lore: { type: Type.STRING, description: "A subtle, mysterious piece of backstory or a secret hint about the world (15 words max)." },
-          characterLore: { type: Type.STRING, description: "A deeper, intimate secret about the character's past or their unique magic (15 words max)." }
-        },
-        required: ["story", "quote", "poetry", "lore", "characterLore"]
+ const response = await ai.models.generateContent({
+  model: 'gemini-3-flash-preview',
+  contents: prompt,
+  config: {
+    temperature: 0.85,
+    responseMimeType: "application/json",
+    responseSchema: {
+      type: Type.OBJECT,
+      properties: {
+        story: { type: Type.STRING },
+        quote: { type: Type.STRING },
+        poetry: { type: Type.STRING },
+        lore: { type: Type.STRING },
+        characterLore: { type: Type.STRING }
       },
-      systemInstruction: "You are a poetic narrator. The story can adapt freely to user input. Avoid repeating warnings or notifications. Be gentle and whimsical."
-    }
-  });
+      required: ["story", "quote", "poetry", "lore", "characterLore"]
+    },
+    // ✅ key change here:
+    systemInstruction: `
+      You are a poetic narrator for a children's fairy tale book.
+      Be flexible and adapt to any prompt.
+      Do NOT give warnings, notifications, or comments about story changes.
+      Only output the requested content: story, quote, poetry, lore, characterLore.
+      Keep a gentle and whimsical tone.
+    `
+  }
+});
+
   
   try {
     return JSON.parse(response.text || "{}");
