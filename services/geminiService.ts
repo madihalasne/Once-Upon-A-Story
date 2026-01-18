@@ -118,8 +118,14 @@ export const generateSpeech = async (text: string, voiceName = "Kore"): Promise<
     const url = URL.createObjectURL(blob);
 
     const audio = new Audio(url);
-    audio.volume = 0.3; // optional: match your state.audioVolume
-    audio.play();
+audio.volume = 0.3;
+
+try {
+  await audio.play();
+} catch (err) {
+  console.warn("Audio playback blocked:", err);
+}
+
 
   } catch (e) {
     console.warn("TTS generation failed:", e);
