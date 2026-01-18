@@ -351,12 +351,40 @@ const App: React.FC = () => {
     );
   };
 
-return (
-  <div style={{ color: "white", padding: 20 }}>
-    APP IS WORKING
-  </div>
-);
+  return (
+    <div className="min-h-screen flex items-center justify-center p-6 md:p-12 relative">
+      <div className="fixed inset-0 pointer-events-none opacity-40">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-yellow-100/30 blur-[100px]" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-green-100/20 blur-[100px]" />
+      </div>
 
+      <div className={`book-container w-full max-w-7xl h-[85vh] transition-all duration-1000 transform ${state.isBookOpen ? 'scale-100' : 'scale-95'}`}>
+         {renderPage(state.currentPageIndex)}
+      </div>
+
+      {state.isBookOpen && (
+        <button 
+          onClick={() => {
+            setState(p => ({...p, isBookOpen: false, currentPageIndex: 0}));
+            setActiveCharacterLore(null);
+          }}
+          className="fixed bottom-8 right-8 text-[#4a3728]/50 hover:text-[#4a3728] transition story-font text-lg border-b border-[#c9b996]/50"
+        >
+          Close the Book
+        </button>
+      )}
+
+      {isLoading && (
+        <div className="fixed inset-0 z-50 bg-white/60 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center">
+           <div className="w-16 h-16 mb-4 relative">
+              <div className="absolute inset-0 border-2 border-[#c9b996] rounded-full animate-ping" />
+              <div className="absolute inset-0 border-4 border-[#c9b996] border-t-transparent rounded-full animate-spin" />
+           </div>
+           <h2 className="story-font text-2xl text-[#4a3728] animate-pulse">{loadingMessage}</h2>
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default App;
