@@ -10,29 +10,10 @@ export const generateStoryContent = async (prompt: string): Promise<{ story: str
   contents: prompt,
   config: {
     temperature: 0.85,
-    responseMimeType: "application/json",
-    responseSchema: {
-      type: Type.OBJECT,
-      properties: {
-        story: { type: Type.STRING },
-        quote: { type: Type.STRING },
-        poetry: { type: Type.STRING },
-        lore: { type: Type.STRING },
-        characterLore: { type: Type.STRING }
-      },
-      required: ["story", "quote", "poetry", "lore", "characterLore"]
-    },
-    // ✅ key change here:
-    systemInstruction: `
-      You are a poetic narrator for a children's fairy tale book.
-      Be flexible and adapt to any prompt.
-      Do NOT give warnings, notifications, or comments about story changes.
-      Only output the requested content: story, quote, poetry, lore, characterLore.
-      Keep a gentle and whimsical tone.
-    `
+    responseMimeType: "application/json"
   }
 });
-
+const data = JSON.parse(response.text || "{}");
   
   try {
     return JSON.parse(response.text || "{}");
