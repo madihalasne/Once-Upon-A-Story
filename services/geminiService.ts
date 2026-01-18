@@ -89,33 +89,48 @@ export const editImageWithPrompt = async (base64Image: string, editPrompt: strin
   return base64Image; // simply return original
 };
 // ================== SPEECH ==================
-export const generateSpeech = async (
+import { VOICE_PROFILES } from "../utils/voiceProfiles";
+
+export function generateSpeech(
   text: string,
-  voiceName = "Kore"
-): Promise<void> => {
-  if (!("speechSynthesis" in window)) {
-    console.warn("Speech synthesis not supported");
-    return;
+  characterName?: string
+) {
+  const synth = window.speechSynthesis;
+
+  if (!text) return;
+
+  const speak = () => {
+    const voices = synth.getVoices();
+    if (!voices.length) return;
+
+    const utter = new SpeechSynthesisUtterance(text);
+
+    // Pick a stable English voice
+    const voice =
+      voices.find(v => v.lang.includes("en") && v.name.includes("Google")) ||
+      voices.find(v => v.lang.includes("en")) ||
+      voices[0];
+
+    utter.voice = voice;
+
+    const profile =
+      (characterName && VOICE_PROFILES[characterName]) ||
+      VOICE_PROFILES.default;
+
+    utter.rate = profile.rate;
+    utter.pitch = profile.pitch;
+    utter.volume = profile.volume;
+
+    synth.cancel();
+    synth.speak(utter);
+  };
+
+  if (synth.getVoices().length === 0) {
+    synth.onvoiceschanged = speak;
+  } else {
+    speak();
   }
-
-  const utterance = new SpeechSynthesisUtterance(text);
-
-  // Voice mapping
-  const voices = window.speechSynthesis.getVoices();
-  const preferred =
-    voices.find(v => v.name.toLowerCase().includes("female")) ||
-    voices.find(v => v.lang.startsWith("en")) ||
-    voices[0];
-
-  if (preferred) utterance.voice = preferred;
-
-  utterance.rate = 0.95;
-  utterance.pitch = 1.05;
-  utterance.volume = 0.9;
-
-  window.speechSynthesis.cancel(); // stop overlapping
-  window.speechSynthesis.speak(utterance);
-};
+}
 
 
 // ================== HELPERS ==================
