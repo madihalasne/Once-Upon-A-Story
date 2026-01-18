@@ -98,32 +98,34 @@ export const generateStoryImage = async (storyText: string): Promise<string> => 
 
 // ================== EDIT IMAGE ==================
 export const editImageWithPrompt = async (base64Image: string, editPrompt: string): Promise<string> => {
-  try {
-    const ai = new GoogleGenAI({ apiKey: API_KEY });
-    const cleanBase64 = base64Image.replace(/^data:image\/(png|jpeg);base64,/, "");
+  const ai = new GoogleGenAI({ apiKey: API_KEY });
+  const cleanBase64 = base64Image.replace(/^data:image\/(png|jpeg);base64,/, "");
 
+  try {
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash-image",
+      model: 'gemini-2.5-flash-image',
       contents: {
         parts: [
-          { inlineData: { data: cleanBase64, mimeType: "image/png" } },
-          {
-            text: `Gently update this watercolor illustration to reflect a happy, warm ending: ${editPrompt}. Keep the classic storybook style, add more sunshine and joy.`
-          }
+          { inlineData: { data: cleanBase64, mimeType: 'image/png' } },
+          { text: `Gently update this watercolor illustration to reflect a happy, warm ending: ${editPrompt}. Keep the classic storybook style, add more sunshine and joy.` }
         ]
       }
     });
 
-   for (const part of response.candidates?.[0]?.content?.parts || []) {
-  if (part.inlineData) {
-    let base64String = part.inlineData.data;
-    if (base64String instanceof Uint8Array) {
-      base64String = Buffer.from(base64String).toString('base64');
+    for (const part of response.candidates?.[0]?.content?.parts || []) {
+      if (part.inlineData) {
+        let base64String = part.inlineData.data;
+        if (base64String instanceof Uint8Array) {
+          base64String = Buffer.from(base64String).toString('base64');
+        }
+        return `data:image/png;base64,${base64String}`;
+      }
     }
-    return `data:image/png;base64,${base64String}`;
-  }
-}
-catch (e) {
+
+    // If no image returned, fallback to original
+    return base64Image;
+
+  } catch (e) {
     console.warn("Edit image failed, returning original:", e);
     return base64Image;
   }
