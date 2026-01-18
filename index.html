@@ -1,0 +1,202 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Once Upon A Fate: The Enchanted Book</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,700;1,400&family=IM+Fell+English:ital@0;1&family=Pinyon+Script&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #fdfaf3;
+            color: #4a3728;
+            overflow-x: hidden;
+            background-image: radial-gradient(circle at center, #fffcf5 0%, #fdfaf3 100%);
+        }
+        .story-font { font-family: 'IM Fell English', serif; }
+        .body-font { font-family: 'Crimson Pro', serif; }
+        .script-font { font-family: 'Pinyon Script', cursive; }
+        
+        .book-container {
+            perspective: 3000px;
+            transform-style: preserve-3d;
+        }
+        .paper-texture {
+            background-color: #fdfaf3;
+            background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
+            box-shadow: inset 0 0 80px rgba(0,0,0,0.05);
+        }
+        .book-cover {
+            background-color: #f7f2e8;
+            background-image: url('https://www.transparenttextures.com/patterns/handmade-paper.png');
+            border: 12px solid #e2d9c2;
+            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .vine-frame::before {
+            content: '';
+            position: absolute;
+            top: 15px; left: 15px; right: 15px; bottom: 15px;
+            border: 1px solid #c9b996;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .ivy-decoration {
+            background-image: url('https://www.transparenttextures.com/patterns/p6.png');
+            opacity: 0.15;
+        }
+        
+        .watercolor-shadow {
+            box-shadow: 0 10px 30px -5px rgba(0,0,0,0.1);
+        }
+
+        /* Magical Effects */
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .shimmer-text {
+            background: linear-gradient(90deg, #4a3728 0%, #c9b996 50%, #4a3728 100%);
+            background-size: 200% 100%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shimmer 3s infinite linear;
+        }
+        .shimmer-text-happy {
+            background: linear-gradient(90deg, #3c5138 0%, #7a8c6e 50%, #3c5138 100%);
+            background-size: 200% 100%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shimmer 3s infinite linear;
+        }
+
+        @keyframes golden-glow {
+            0%, 100% { box-shadow: 0 0 15px rgba(201, 185, 150, 0.2); border-color: #c9b996; }
+            50% { box-shadow: 0 0 30px rgba(201, 185, 150, 0.6); border-color: #fffcf5; }
+        }
+        .magical-glow {
+            animation: golden-glow 4s infinite ease-in-out;
+        }
+
+        @keyframes pulse-lore {
+            0% { transform: scale(1); opacity: 0.6; }
+            50% { transform: scale(1.1); opacity: 1; box-shadow: 0 0 10px #c9b996; }
+            100% { transform: scale(1); opacity: 0.6; }
+        }
+        .lore-pulse {
+            animation: pulse-lore 3s infinite ease-in-out;
+        }
+
+        /* Fluid Page Turn Animation */
+        .flipping-right {
+            animation: flip-right 1.2s cubic-bezier(0.645, 0.045, 0.355, 1) forwards;
+            transform-origin: left center;
+        }
+        .flipping-left {
+            animation: flip-left 1.2s cubic-bezier(0.645, 0.045, 0.355, 1) forwards;
+            transform-origin: right center;
+        }
+
+        @keyframes flip-right {
+            0% { transform: rotateY(0deg); filter: brightness(1); }
+            50% { transform: rotateY(-90deg); filter: brightness(0.7); box-shadow: 20px 0 50px rgba(0,0,0,0.2); }
+            100% { transform: rotateY(-180deg); opacity: 0; filter: brightness(1); }
+        }
+        @keyframes flip-left {
+            0% { transform: rotateY(0deg); filter: brightness(1); }
+            50% { transform: rotateY(90deg); filter: brightness(0.7); box-shadow: -20px 0 50px rgba(0,0,0,0.2); }
+            100% { transform: rotateY(180deg); opacity: 0; filter: brightness(1); }
+        }
+
+        .content-reveal {
+            animation: content-fade-in 0.8s ease-out forwards;
+        }
+
+        @keyframes content-fade-in {
+            0% { opacity: 0; transform: translateY(10px); filter: blur(4px); }
+            100% { opacity: 1; transform: translateY(0); filter: blur(0); }
+        }
+
+        /* Speech Bubble */
+        .speech-cloud {
+            position: relative;
+            background: #ffffff;
+            border-radius: .4em;
+            padding: 10px 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border: 2px solid #e2d9c2;
+            cursor: pointer;
+            transition: all 0.3s;
+            max-width: 200px;
+            animation: float 3s ease-in-out infinite;
+        }
+        .speech-cloud:hover {
+            transform: scale(1.05);
+            border-color: #c9b996;
+            box-shadow: 0 8px 20px rgba(201, 185, 150, 0.3);
+        }
+        .speech-cloud:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border: 20px solid transparent;
+            border-top-color: #ffffff;
+            border-bottom: 0;
+            border-left: 0;
+            margin-left: -10px;
+            bottom: -20px;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .scrollbar-ancient::-webkit-scrollbar {
+            width: 6px;
+        }
+        .scrollbar-ancient::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .scrollbar-ancient::-webkit-scrollbar-thumb {
+            background: #d4c4a8;
+            border-radius: 10px;
+        }
+
+        .audio-slider {
+            -webkit-appearance: none;
+            width: 80px;
+            height: 4px;
+            background: #d4c4a8;
+            outline: none;
+            border-radius: 2px;
+        }
+        .audio-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 12px;
+            height: 12px;
+            background: #4a3728;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.2.3",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "@google/genai": "https://esm.sh/@google/genai@^1.37.0"
+  }
+}
+</script>
+</head>
+<body class="bg-[#fdfaf3]">
+    <div id="root"></div>
+</body>
+</html>

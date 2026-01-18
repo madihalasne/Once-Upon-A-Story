@@ -1,0 +1,7 @@
+{
+  "name": "Once Upon A Story",
+  "description": "An ancient, leather-bound story book where players rewrite tragic legends into heroic epics using the power of Gemini.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
