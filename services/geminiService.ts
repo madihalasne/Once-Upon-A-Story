@@ -6,16 +6,16 @@ const API_KEY = import.meta.env.VITE_GEMINI_API_KEY as string;
 // FREE image mapping (no API, no cost)
 const STORY_IMAGES = {
   story1: {
-    before: "/images/story1-before.jpg",
-    after: "/images/story1-after.jpg",
+    before: "/images/story1-before.jpeg",
+    after: "/images/story1-after.jpeg",
   },
   story2: {
-    before: "/images/story2-before.jpg",
-    after: "/images/story2-after.jpg",
+    before: "/images/story2-before.jpeg",
+    after: "/images/story2-after.jpeg",
   },
   story3: {
-    before: "/images/story3-before.jpg",
-    after: "/images/story3-after.jpg",
+    before: "/images/story3-before.jpeg",
+    after: "/images/story3-after.jpeg",
   }
 };
 
