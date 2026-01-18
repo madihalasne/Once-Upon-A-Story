@@ -13,86 +13,82 @@ const FALLBACK_CONTENT = {
 };
 
 // ================== STORY ==================
-export const generateStoryContent = async (prompt: string): Promise<{
-  story: string;
-  quote: string;
-  poetry: string;
-  lore: string;
-  characterLore: string;
-}> => {
+export const generateStoryContent = async (
+  prompt: string
+): Promise<{ story: string; quote: string; poetry: string; lore: string; characterLore: string }> => {
+  const ai = new GoogleGenAI({ apiKey: API_KEY });
+
   try {
-    const ai = new GoogleGenAI({ apiKey: API_KEY });
     const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
+      model: 'gemini-3-flash-preview',
       contents: prompt,
       config: {
         temperature: 0.85,
         responseMimeType: "application/json",
-        systemInstruction: `
-          You are a poetic narrator for a children's fairy tale book.
-          Follow the user prompt and adapt freely.
-          ONLY output story, quote, poetry, lore, and characterLore.
-          Do NOT include warnings or notifications.
-          Keep a gentle and whimsical tone.
-        `
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            story: { type: Type.STRING },
+            quote: { type: Type.STRING },
+            poetry: { type: Type.STRING },
+            lore: { type: Type.STRING },
+            characterLore: { type: Type.STRING }
+          },
+          required: ["story", "quote", "poetry", "lore", "characterLore"]
+        },
+        systemInstruction: "You are a gentle poetic narrator for a fairy tale book. Provide story, quote, poetry, lore, and characterLore."
       }
     });
 
-    const data = JSON.parse(response.text || "{}");
+    // Always parse response.text safely
+    return JSON.parse(response.text || "{}");
 
-    // Strip unwanted notifications if present
-    if (data.story) {
-      data.story = data.story.replace(
-        /one notification pops up\. The story is resisting change[\s\S]*$/i,
-        ""
-      );
-    }
-
-    return {
-      story: data.story || FALLBACK_CONTENT.story,
-      quote: data.quote || FALLBACK_CONTENT.quote,
-      poetry: data.poetry || FALLBACK_CONTENT.poetry,
-      lore: data.lore || FALLBACK_CONTENT.lore,
-      characterLore: data.characterLore || FALLBACK_CONTENT.characterLore
-    };
   } catch (e) {
     console.warn("Story generation failed, using fallback:", e);
-    return FALLBACK_CONTENT;
+    return {
+      story: "A gentle story unfolds, but the magic hesitated.",
+      quote: "Even dreams need a patient heart.",
+      poetry: "Soft winds whisper through the trees,\nLeaves dance gently with the breeze.\nA tale awaits in morning light,\nTo fill the heart with pure delight.",
+      lore: "Secrets hide in the folds of forgotten maps.",
+      characterLore: "The character once whispered to the stars."
+    };
   }
 };
 
 // ================== IMAGE ==================
 export const generateStoryImage = async (storyText: string): Promise<string> => {
+  const ai = new GoogleGenAI({ apiKey: API_KEY });
+
   try {
-    const ai = new GoogleGenAI({ apiKey: API_KEY });
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash-image",
-      contents: {
-        parts: [
-          {
-            text: `A soft, delicate watercolor illustration in the style of Beatrix Potter. Scene: ${storyText}. Soft pastel colors, fine ink line work, warm cream background, charming and nostalgic.`
-          }
-        ]
-      },
-      config: { imageConfig: { aspectRatio: "1:1" } }
+      model: 'gemini-2.5-flash-image',
+      contents: [
+        {
+          text: `Create a detailed watercolor illustration in the style of Beatrix Potter. Scene: ${storyText}. 
+          Focus on soft pastel colors, fine ink line work, charming, whimsical, warm cream background, magical atmosphere.`
+        }
+      ],
+      config: {
+        imageConfig: { aspectRatio: "1:1", width: 512, height: 512 } // explicit resolution
+      }
     });
 
-   for (const part of response.candidates?.[0]?.content?.parts || []) {
-  if (part.inlineData) {
-    // FIX: convert Uint8Array to base64 if needed
-    let base64String = part.inlineData.data;
-    if (base64String instanceof Uint8Array) {
-      base64String = Buffer.from(base64String).toString('base64');
+    // Try inline data first
+    const parts = response.candidates?.[0]?.content?.parts || [];
+    for (const part of parts) {
+      if (part.inlineData?.data) {
+        return `data:image/png;base64,${part.inlineData.data}`;
+      }
+      // If Gemini returns a uri
+      if (part.uri) return part.uri;
     }
-    return `data:image/png;base64,${base64String}`;
-  }
-}
 
-    // fallback image
-    return "https://via.placeholder.com/400x400.png?text=Story+Image";
+    console.warn("No image data returned, using placeholder");
+    return 'https://picsum.photos/id/20/400/400';
+
   } catch (e) {
     console.warn("Image generation failed, using placeholder:", e);
-    return "https://via.placeholder.com/400x400.png?text=Story+Image";
+    return 'https://picsum.photos/id/20/400/400';
   }
 };
 
@@ -104,25 +100,20 @@ export const editImageWithPrompt = async (base64Image: string, editPrompt: strin
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash-image',
-      contents: {
-        parts: [
-          { inlineData: { data: cleanBase64, mimeType: 'image/png' } },
-          { text: `Gently update this watercolor illustration to reflect a happy, warm ending: ${editPrompt}. Keep the classic storybook style, add more sunshine and joy.` }
-        ]
-      }
+      contents: [
+        { inlineData: { data: cleanBase64, mimeType: 'image/png' } },
+        { text: `Gently update this watercolor illustration: ${editPrompt}. Keep classic storybook style, soft light, magical, charming.` }
+      ],
+      config: { imageConfig: { aspectRatio: "1:1", width: 512, height: 512 } }
     });
 
-    for (const part of response.candidates?.[0]?.content?.parts || []) {
-      if (part.inlineData) {
-        let base64String = part.inlineData.data;
-        if (base64String instanceof Uint8Array) {
-          base64String = Buffer.from(base64String).toString('base64');
-        }
-        return `data:image/png;base64,${base64String}`;
-      }
+    const parts = response.candidates?.[0]?.content?.parts || [];
+    for (const part of parts) {
+      if (part.inlineData?.data) return `data:image/png;base64,${part.inlineData.data}`;
+      if (part.uri) return part.uri;
     }
 
-    // If no image returned, fallback to original
+    console.warn("Edit image returned no data, using original");
     return base64Image;
 
   } catch (e) {
