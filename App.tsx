@@ -157,13 +157,17 @@ const newImage = getStoryImage(state.currentPageIndex, "after");
 
   if (!story.characterQuote) return;
 
-  // ✅ Simple user-gesture-safe playback
+  // ✨ Emotional pauses for expressive speech
+  const emotionalText = story.characterQuote
+    .replace(/\./g, "… ")
+    .replace(/\!/g, " — ")
+    .replace(/\?/g, "… ");
+
   generateSpeech(
-    story.characterQuote,
-    story.voiceName || "Kore"
+    emotionalText,
+    story.characterName
   );
 };
-
 
   const nextPage = () => {
     if (state.currentPageIndex < state.stories.length && !isFlipping) {
