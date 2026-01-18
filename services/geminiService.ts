@@ -77,11 +77,16 @@ export const generateStoryImage = async (storyText: string): Promise<string> => 
       config: { imageConfig: { aspectRatio: "1:1" } }
     });
 
-    for (const part of response.candidates?.[0]?.content?.parts || []) {
-      if (part.inlineData) {
-        return `data:image/png;base64,${part.inlineData.data}`;
-      }
+   for (const part of response.candidates?.[0]?.content?.parts || []) {
+  if (part.inlineData) {
+    // FIX: convert Uint8Array to base64 if needed
+    let base64String = part.inlineData.data;
+    if (base64String instanceof Uint8Array) {
+      base64String = Buffer.from(base64String).toString('base64');
     }
+    return `data:image/png;base64,${base64String}`;
+  }
+}
 
     // fallback image
     return "https://via.placeholder.com/400x400.png?text=Story+Image";
@@ -109,12 +114,16 @@ export const editImageWithPrompt = async (base64Image: string, editPrompt: strin
       }
     });
 
-    for (const part of response.candidates?.[0]?.content?.parts || []) {
-      if (part.inlineData) return `data:image/png;base64,${part.inlineData.data}`;
+   for (const part of response.candidates?.[0]?.content?.parts || []) {
+  if (part.inlineData) {
+    let base64String = part.inlineData.data;
+    if (base64String instanceof Uint8Array) {
+      base64String = Buffer.from(base64String).toString('base64');
     }
-
-    return base64Image;
-  } catch (e) {
+    return `data:image/png;base64,${base64String}`;
+  }
+}
+catch (e) {
     console.warn("Edit image failed, returning original:", e);
     return base64Image;
   }
