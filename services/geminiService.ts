@@ -1,4 +1,4 @@
-import { GoogleGenAI, Modality } from "@google/genai";
+import { GoogleGenAI, Modality, Type } from "@google/genai";
 
 // ✅ Use Vite env variable, not process.env
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY as string;
@@ -69,34 +69,32 @@ export const generateStoryImage = async (storyText: string): Promise<string> => 
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash-image',
-      contents: [
-        {
-          text: `Create a detailed watercolor illustration in the style of Beatrix Potter. Scene: ${storyText}. 
-          Focus on soft pastel colors, fine ink line work, charming, whimsical, warm cream background, magical atmosphere.`
-        }
-      ],
+      model: "gemini-2.5-flash-image",
+      contents: [{
+        parts: [{
+          text: `Watercolor storybook illustration, soft pastel colors, gentle ink lines, warm light, whimsical fairy tale mood. Scene: ${storyText}`
+        }]
+      }],
       config: {
-        imageConfig: { aspectRatio: "1:1", width: 512, height: 512 } // explicit resolution
+        imageConfig: {
+          aspectRatio: "1:1"
+        }
       }
     });
 
-    // Try inline data first
     const parts = response.candidates?.[0]?.content?.parts || [];
+
     for (const part of parts) {
       if (part.inlineData?.data) {
         return `data:image/png;base64,${part.inlineData.data}`;
       }
-      // If Gemini returns a uri
-      if (part.uri) return part.uri;
     }
 
-    console.warn("No image data returned, using placeholder");
-    return 'https://picsum.photos/id/20/400/400';
+    throw new Error("No base64 image returned");
 
   } catch (e) {
-    console.warn("Image generation failed, using placeholder:", e);
-    return 'https://picsum.photos/id/20/400/400';
+    console.warn("Image generation failed, using fallback:", e);
+    return "https://picsum.photos/512/512";
   }
 };
 
