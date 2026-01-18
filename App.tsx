@@ -70,7 +70,7 @@ const App: React.FC = () => {
       for (let i = 0; i < updatedStories.length; i++) {
        if (!updatedStories[i].currentImage) {
   try {
-    updatedStories[i].currentImage = await generateStoryImage(updatedStories[i].initialSadStory);
+updatedStories[i].currentImage = getStoryImage(i + 1, "before");
   } catch (e) {
     console.warn("Image generation failed, using placeholder:", e);
     updatedStories[i].currentImage = 'https://via.placeholder.com/400x400.png?text=Story+Image';
@@ -111,7 +111,7 @@ try {
 const imagePrompt = `Classic watercolor update: ${actionInput}. Add soft golden light, blooming flowers, and a sense of magical healing.`;
 let newImage;
 try {
-  newImage = await editImageWithPrompt(currentStory.currentImage!, imagePrompt);
+ const newImage = getStoryImage(state.currentPageIndex, "after");
 } catch (e) {
   console.warn("Edit image failed, using original:", e);
   newImage = currentStory.currentImage!;
