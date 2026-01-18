@@ -20,9 +20,9 @@ const STORY_IMAGES = {
 };
 
 export const getStoryImage = (storyIndex: number, stage: "before" | "after"): string => {
-  // storyIndex: 1, 2, 3
-  return `/images/story${storyIndex}-${stage}.png`;
+  return STORY_IMAGES[`story${storyIndex}`]?.[stage] || "https://picsum.photos/512/512";
 };
+
 
 // Fallback content if story generation fails
 const FALLBACK_CONTENT = {
