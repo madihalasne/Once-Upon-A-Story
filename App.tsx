@@ -68,16 +68,11 @@ const App: React.FC = () => {
       setLoadingMessage("Winding the clocks of Once Upon A Time...");
       const updatedStories = [...state.stories];
       for (let i = 0; i < updatedStories.length; i++) {
-       if (!updatedStories[i].currentImage) {
-  try {
-updatedStories[i].currentImage = getStoryImage(i + 1, "before");
-  } catch (e) {
-    console.warn("Image generation failed, using placeholder:", e);
-    updatedStories[i].currentImage = 'https://via.placeholder.com/400x400.png?text=Story+Image';
+  if (!updatedStories[i].currentImage) {
+    updatedStories[i].currentImage = getStoryImage(i + 1, "before");
   }
 }
 
-      }
       setState(prev => ({ ...prev, stories: updatedStories }));
       setIsLoading(false);
     };
