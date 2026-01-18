@@ -87,10 +87,7 @@ export const generateStoryContent = async (
 // ================== EDIT IMAGE ==================
 export const editImageWithPrompt = async (base64Image: string, editPrompt: string): Promise<string> => {
   return base64Image; // simply return original
-};export const editImageWithPrompt = async (base64Image: string, editPrompt: string): Promise<string> => {
-  return base64Image; // simply return original
 };
-
 // ================== SPEECH ==================
 export const generateSpeech = async (text: string, voiceName = "Kore"): Promise<void> => {
   try {
