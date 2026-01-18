@@ -16,7 +16,7 @@ const FALLBACK_CONTENT = {
 export const generateStoryContent = async (
   prompt: string
 ): Promise<{ story: string; quote: string; poetry: string; lore: string; characterLore: string }> => {
-  const ai = new GoogleGenAI({ apiKey: API_KEY });
+  const ai = new GoogleGenAI({ apiKey: API_KEY }); 
 
   try {
     const response = await ai.models.generateContent({
@@ -40,8 +40,16 @@ export const generateStoryContent = async (
       }
     });
 
-    // Always parse response.text safely
-    return JSON.parse(response.text || "{}");
+    // FIX: Safely return all fields, using defaults if missing
+    const data = JSON.parse(response.text || "{}");
+
+    return {
+      story: data.story || response.text || "",
+      quote: data.quote || "...",
+      poetry: data.poetry || "Soft winds whisper through the trees,\nLeaves dance gently with the breeze.\nA tale awaits in morning light,\nTo fill the heart with pure delight.",
+      lore: data.lore || "Secrets hide in the folds of forgotten maps.",
+      characterLore: data.characterLore || "The character once whispered to the stars."
+    };
 
   } catch (e) {
     console.warn("Story generation failed, using fallback:", e);
