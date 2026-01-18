@@ -3,6 +3,30 @@ import { GoogleGenAI, Modality, Type } from "@google/genai";
 // ✅ Use Vite env variable, not process.env
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY as string;
 
+// FREE image mapping (no API, no cost)
+const STORY_IMAGES = {
+  story1: {
+    before: "/images/story1-before.jpg",
+    after: "/images/story1-after.jpg",
+  },
+  story2: {
+    before: "/images/story2-before.jpg",
+    after: "/images/story2-after.jpg",
+  },
+  story3: {
+    before: "/images/story3-before.jpg",
+    after: "/images/story3-after.jpg",
+  }
+};
+
+export const getStoryImage = (
+  storyNumber: 1 | 2 | 3,
+  version: "before" | "after"
+): string => {
+  return STORY_IMAGES[`story${storyNumber}`][version];
+};
+
+
 // Fallback content if story generation fails
 const FALLBACK_CONTENT = {
   story: "Once upon a time in a magical land...",
@@ -92,36 +116,6 @@ NO modern objects
 };
 
 // ================== IMAGE ==================
-export const generateStoryImage = async (storyText: string): Promise<string> => {
-  const ai = new GoogleGenAI({ apiKey: API_KEY });
-
-  try {
-    const imagePrompt = createImagePromptFromStory(storyText);
-
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash-image",
-      contents: [{ role: "user", parts: [{ text: imagePrompt }] }],
-      config: {
-        responseModalities: ["IMAGE"],
-        imageConfig: { width: 512, height: 512, aspectRatio: "1:1" }
-      }
-    });
-
-    const parts = response.candidates?.[0]?.content?.parts || [];
-
-    for (const part of parts) {
-      if (part.inlineData?.data) {
-        return `data:image/png;base64,${part.inlineData.data}`;
-      }
-    }
-
-    throw new Error("No image generated");
-
-  } catch (e) {
-    console.warn("Image generation failed:", e);
-    return "https://picsum.photos/400/400";
-  }
-};
 
 
 // ================== EDIT IMAGE ==================
