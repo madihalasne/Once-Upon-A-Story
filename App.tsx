@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Story, JournalState } from './types';
-import { generateStoryContent, generateStoryImage, editImageWithPrompt, generateVeoVideo, generateSpeech } from './services/geminiService';
+import { generateStoryContent, getStoryImage, editImageWithPrompt, generateVeoVideo, generateSpeech } from './services/geminiService';
 import { StoryPaper, LoreSeal, ParchmentScrap } from './components/JournalUI';
 
 const INITIAL_STORIES: Story[] = [
