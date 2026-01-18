@@ -63,40 +63,73 @@ export const generateStoryContent = async (
   }
 };
 
+// ================== IMAGE PROMPT BUILDER ==================
+const createImagePromptFromStory = (storyText: string) => {
+  // Take only the first 1–2 sentences to avoid abstract confusion
+  const visualScene = storyText
+    .replace(/\n/g, " ")
+    .split(".")
+    .slice(0, 2)
+    .join(".")
+    .trim();
+
+  return `
+Children's storybook watercolor illustration.
+
+Visible scene:
+${visualScene}
+
+Environment details:
+Soft magical lighting, gentle glow, pastel colors, whimsical fantasy mood.
+Natural scenery like forests, gardens, cottages, or moonlit paths.
+
+Art style:
+Beatrix Potter inspired watercolor,
+soft ink outlines,
+hand-painted texture,
+warm cream paper background,
+storybook illustration,
+gentle, cozy, magical.
+`;
+};
+
 // ================== IMAGE ==================
 export const generateStoryImage = async (storyText: string): Promise<string> => {
   const ai = new GoogleGenAI({ apiKey: API_KEY });
 
   try {
+    // ✅ NEW: create clean visual prompt
+    const imagePrompt = createImagePromptFromStory(storyText);
+
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash-image",
-      contents: [{
-        parts: [{
-          text: `Watercolor storybook illustration, soft pastel colors, gentle ink lines, warm light, whimsical fairy tale mood. Scene: ${storyText}`
-        }]
-      }],
+      model: 'gemini-2.5-flash-image',
+      contents: [{ text: imagePrompt }],
       config: {
         imageConfig: {
-          aspectRatio: "1:1"
+          aspectRatio: "1:1",
+          width: 512,
+          height: 512
         }
       }
     });
 
     const parts = response.candidates?.[0]?.content?.parts || [];
-
     for (const part of parts) {
       if (part.inlineData?.data) {
         return `data:image/png;base64,${part.inlineData.data}`;
       }
+      if (part.uri) return part.uri;
     }
 
-    throw new Error("No base64 image returned");
+    console.warn("No image returned, using placeholder");
+    return 'https://picsum.photos/id/20/400/400';
 
   } catch (e) {
-    console.warn("Image generation failed, using fallback:", e);
-    return "https://picsum.photos/512/512";
+    console.warn("Image generation failed, using placeholder:", e);
+    return 'https://picsum.photos/id/20/400/400';
   }
 };
+
 
 // ================== EDIT IMAGE ==================
 export const editImageWithPrompt = async (base64Image: string, editPrompt: string): Promise<string> => {
