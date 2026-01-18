@@ -22,7 +22,7 @@ export const generateStoryContent = async (prompt: string): Promise<{ story: str
         },
         required: ["story", "quote", "poetry", "lore", "characterLore"]
       },
-      systemInstruction: "You are a poetic narrator for a classic children's fairy tale book. Your tone is gentle and whimsical. Provide the story text, a character quote, a 4-line poem, a tiny world secret, and an intimate character secret."
+      systemInstruction: "You are a poetic narrator. The story can adapt freely to user input. Avoid repeating warnings or notifications. Be gentle and whimsical."
     }
   });
   
