@@ -151,11 +151,19 @@ const newImage = getStoryImage(state.currentPageIndex, "after");
   };
 
   const speakAndShowLore = (story: Story) => {
-    setActiveCharacterLore(story.characterLore || "The heart has its own secrets.");
-    if (story.characterQuote) {
-      generateSpeech(story.characterQuote, story.voiceName || 'Kore');
-    }
-  };
+  setActiveCharacterLore(
+    story.characterLore || "The heart has its own secrets."
+  );
+
+  if (!story.characterQuote) return;
+
+  // ✅ Simple user-gesture-safe playback
+  generateSpeech(
+    story.characterQuote,
+    story.voiceName || "Kore"
+  );
+};
+
 
   const nextPage = () => {
     if (state.currentPageIndex < state.stories.length && !isFlipping) {
