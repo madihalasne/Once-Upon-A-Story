@@ -89,8 +89,6 @@ export const editImageWithPrompt = async (base64Image: string, editPrompt: strin
   return base64Image; // simply return original
 };
 // ================== SPEECH ==================
-import { VOICE_PROFILES } from "../utils/voiceProfiles";
-
 export function generateSpeech(
   text: string,
   characterName?: string
