@@ -1,10 +1,14 @@
 
-import { GoogleGenAI, Type, GenerateContentResponse, Modality } from "@google/genai";
+import { GoogleGenAI, Type, Modality } from "@google/genai";
 
-const VITE_GEMINI_API_KEY = process.env.API_KEY;
+const API_KEY = import.meta.env.VITE_GEMINI_API_KEY as string;
+
+if (!API_KEY) {
+  console.error("❌ Gemini API key is missing");
+}
 
 export const generateStoryContent = async (prompt: string): Promise<{ story: string, quote: string, poetry: string, lore: string, characterLore: string }> => {
-  const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
+  const ai = new GoogleGenAI({ apiKey: API_KEY });
   const response = await ai.models.generateContent({
     model: 'gemini-3-flash-preview',
     contents: prompt,
